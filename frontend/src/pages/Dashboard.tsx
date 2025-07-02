@@ -241,10 +241,10 @@ const Dashboard: React.FC = () => {
                   {assignments.map((assignment) => (
                     <tr key={assignment.id} className="hover:bg-gray-25 transition-colors duration-150">
                       <td className="px-6 py-4 text-sm font-medium text-black">
-                        {assignment.engineer?.name || '—'}
+                        {assignment.engineerName || '—'}
                       </td>
                       <td className="px-6 py-4 text-sm text-black">
-                        {assignment.project?.name || '—'}
+                        {assignment.projectName || '—'}
                       </td>
                       <td className="px-6 py-4 text-sm text-black hidden sm:table-cell">
                         {assignment.role || '—'}

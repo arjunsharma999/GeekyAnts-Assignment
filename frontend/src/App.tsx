@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Assignments from './pages/Assignments';
 import Engineers from './pages/Engineers';
+import Analytics from './pages/Analytics';
 import Register from './pages/Register';
 
 // Protected Route Component
@@ -80,6 +81,16 @@ const AppContent: React.FC = () => {
             <ProtectedRoute>
               <Layout>
                 <Engineers />
+              </Layout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <ProtectedRoute>
+              <Layout>
+                <Analytics />
               </Layout>
             </ProtectedRoute>
           }

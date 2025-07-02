@@ -21,6 +21,7 @@ const Assignments: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [deletingAssignment, setDeletingAssignment] = useState<number | null>(null);
 
   // Fetch all assignments, projects, and engineers
   const fetchData = async () => {
@@ -80,6 +81,26 @@ const Assignments: React.FC = () => {
       setError(err.response?.data?.detail || 'Failed to create assignment');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAssignment = async (assignmentId: number) => {
+    if (!window.confirm('Are you sure you want to delete this assignment?')) {
+      return;
+    }
+    
+    setDeletingAssignment(assignmentId);
+    setError('');
+    setSuccess('');
+    
+    try {
+      await assignmentsAPI.deleteAssignment(assignmentId);
+      setSuccess('Assignment deleted successfully!');
+      fetchData();
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to delete assignment');
+    } finally {
+      setDeletingAssignment(null);
     }
   };
 
@@ -199,23 +220,43 @@ const Assignments: React.FC = () => {
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Allocation</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End</th>
+              {isManager && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              )}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {assignments.map((a) => {
-              const engineer = engineers.find(e => e.id === a.engineerId);
-              const project = projects.find(p => p.id === a.projectId);
-              return (
-                <tr key={a.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">{engineer?.name || a.engineerId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{project?.name || a.projectId}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{a.role || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{a.allocationPercentage || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{a.startDate || '-'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">{a.endDate || '-'}</td>
-                </tr>
-              );
-            })}
+            {assignments.map((a) => (
+              <tr key={a.id}>
+                <td className="px-6 py-4 whitespace-nowrap">{a.engineerName || '—'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{a.projectName || '—'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{a.role || '—'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{a.allocationPercentage || '—'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{a.startDate || '—'}</td>
+                <td className="px-6 py-4 whitespace-nowrap">{a.endDate || '—'}</td>
+                {isManager && (
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <button
+                      onClick={() => handleDeleteAssignment(a.id)}
+                      disabled={deletingAssignment === a.id}
+                      className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="Delete assignment"
+                    >
+                      {deletingAssignment === a.id ? (
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      )}
+                    </button>
+                  </td>
+                )}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

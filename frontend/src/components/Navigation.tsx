@@ -23,6 +23,7 @@ const Navigation: React.FC = () => {
       { path: '/projects', label: 'Projects', icon: 'projects' },
       { path: '/assignments', label: 'Assignments', icon: 'assignments' },
       { path: '/engineers', label: 'Engineers', icon: 'engineers' },
+      { path: '/analytics', label: 'Analytics', icon: 'analytics' },
       { path: '/register', label: 'Add User', icon: 'add' }
     ] : [])
   ];
@@ -65,6 +66,12 @@ const Navigation: React.FC = () => {
         return (
           <svg {...iconProps}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM3 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 019.374 21c-2.331 0-4.512-.645-6.374-1.766z" />
+          </svg>
+        );
+      case 'analytics':
+        return (
+          <svg {...iconProps}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
           </svg>
         );
       default:

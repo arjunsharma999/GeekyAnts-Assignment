@@ -67,4 +67,23 @@ def get_all_assignments(db: Session):
     return db.query(models.Assignment).all()
 
 def get_all_users(db: Session):
-    return db.query(models.User).all() 
+    return db.query(models.User).all()
+
+def delete_assignment(db: Session, assignment_id: int):
+    db_assignment = db.query(models.Assignment).filter(models.Assignment.id == assignment_id).first()
+    if db_assignment:
+        db.delete(db_assignment)
+        db.commit()
+        return True
+    return False
+
+def delete_project(db: Session, project_id: int):
+    db_project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if db_project:
+        # First delete all assignments associated with this project
+        db.query(models.Assignment).filter(models.Assignment.projectId == project_id).delete()
+        # Then delete the project
+        db.delete(db_project)
+        db.commit()
+        return True
+    return False 

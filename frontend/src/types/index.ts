@@ -31,6 +31,8 @@ export interface Assignment {
   startDate?: string;
   endDate?: string;
   role?: string;
+  engineerName?: string;
+  projectName?: string;
   engineer?: User;
   project?: Project;
 }

@@ -16,15 +16,20 @@ const initialForm: CreateProjectRequest = {
 const Projects: React.FC = () => {
   const { isManager } = useAuth();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [filteredProjects, setFilteredProjects] = useState<Project[]>([]);
   const [form, setForm] = useState<CreateProjectRequest>(initialForm);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  const [deletingProject, setDeletingProject] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
 
   const fetchProjects = async () => {
     try {
       const data = await projectsAPI.getAllProjects();
       setProjects(data);
+      setFilteredProjects(data);
     } catch (err) {
       setError('Failed to fetch projects');
     }
@@ -33,6 +38,27 @@ const Projects: React.FC = () => {
   useEffect(() => {
     fetchProjects();
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [searchTerm, statusFilter, projects]);
+
+  const applyFilters = () => {
+    let filtered = projects;
+    
+    if (searchTerm) {
+      filtered = filtered.filter(project => 
+        project.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        project.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (statusFilter) {
+      filtered = filtered.filter(project => project.status === statusFilter);
+    }
+    
+    setFilteredProjects(filtered);
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -76,6 +102,26 @@ const Projects: React.FC = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteProject = async (projectId: number) => {
+    if (!window.confirm('Are you sure you want to delete this project? This will also delete all associated assignments.')) {
+      return;
+    }
+    
+    setDeletingProject(projectId);
+    setError('');
+    setSuccess('');
+    
+    try {
+      await projectsAPI.deleteProject(projectId);
+      setSuccess('Project deleted successfully!');
+      fetchProjects();
+    } catch (err: any) {
+      setError(err.response?.data?.detail || 'Failed to delete project');
+    } finally {
+      setDeletingProject(null);
     }
   };
 
@@ -177,12 +223,62 @@ const Projects: React.FC = () => {
         </div>
       )}
       <div className="bg-white p-4 sm:p-6 rounded shadow">
-        <h2 className="text-lg sm:text-xl font-semibold mb-2">All Projects</h2>
+        <h2 className="text-lg sm:text-xl font-semibold mb-4">All Projects</h2>
+        
+        {/* Search and Filter Section */}
+        <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search Projects</label>
+              <input
+                type="text"
+                placeholder="Search by name or description..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:border-transparent"
+              >
+                <option value="">All Statuses</option>
+                <option value="planning">Planning</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+        </div>
         {/* Mobile view - Cards */}
         <div className="block sm:hidden space-y-4">
-          {projects.map((project) => (
+          {filteredProjects.map((project) => (
             <div key={project.id} className="border border-gray-200 rounded-lg p-4">
-              <div className="font-semibold text-lg mb-2">{project.name}</div>
+              <div className="flex justify-between items-start mb-2">
+                <div className="font-semibold text-lg">{project.name}</div>
+                {isManager && (
+                  <button
+                    onClick={() => handleDeleteProject(project.id)}
+                    disabled={deletingProject === project.id}
+                    className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    title="Delete project"
+                  >
+                    {deletingProject === project.id ? (
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    )}
+                  </button>
+                )}
+              </div>
               <div className="space-y-1 text-sm">
                 <div><span className="font-medium">Status:</span> {project.status}</div>
                 <div><span className="font-medium">Team Size:</span> {project.teamSize}</div>
@@ -202,16 +298,40 @@ const Projects: React.FC = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Team Size</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">End</th>
+                {isManager && (
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                )}
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {projects.map((project) => (
+                            <tbody className="bg-white divide-y divide-gray-200">
+                  {filteredProjects.map((project) => (
                 <tr key={project.id}>
                   <td className="px-6 py-4 whitespace-nowrap">{project.name}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{project.status}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{project.teamSize}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{project.startDate || '-'}</td>
                   <td className="px-6 py-4 whitespace-nowrap">{project.endDate || '-'}</td>
+                  {isManager && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <button
+                        onClick={() => handleDeleteProject(project.id)}
+                        disabled={deletingProject === project.id}
+                        className="text-red-600 hover:text-red-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete project"
+                      >
+                        {deletingProject === project.id ? (
+                          <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                        ) : (
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        )}
+                      </button>
+                    </td>
+                  )}
                 </tr>
               ))}
             </tbody>

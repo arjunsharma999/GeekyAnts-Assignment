@@ -53,4 +53,16 @@ def get_assignment(
         if db_assignment.engineerId != current_user.id:
             raise HTTPException(status_code=403, detail="Access denied")
     
-    return db_assignment 
+    return db_assignment
+
+@router.delete("/{assignment_id}")
+def delete_assignment(
+    assignment_id: int, 
+    db: Session = Depends(get_db),
+    current_manager: models.User = Depends(auth.get_current_manager)
+):
+    # Only managers can delete assignments
+    success = crud.delete_assignment(db, assignment_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    return {"message": "Assignment deleted successfully"} 

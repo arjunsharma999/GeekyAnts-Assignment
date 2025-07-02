@@ -4,13 +4,52 @@ import { User } from '../types';
 
 const Engineers: React.FC = () => {
   const [engineers, setEngineers] = useState<User[]>([]);
+  const [filteredEngineers, setFilteredEngineers] = useState<User[]>([]);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [skillFilter, setSkillFilter] = useState('');
+  const [seniorityFilter, setSeniorityFilter] = useState('');
 
   useEffect(() => {
     usersAPI.getAllUsers()
-      .then(users => setEngineers(users.filter(u => u.role === 'engineer')))
+      .then(users => {
+        const engineerUsers = users.filter(u => u.role === 'engineer');
+        setEngineers(engineerUsers);
+        setFilteredEngineers(engineerUsers);
+      })
       .catch(() => setError('Failed to fetch engineers'));
   }, []);
+
+  useEffect(() => {
+    applyFilters();
+  }, [searchTerm, skillFilter, seniorityFilter, engineers]);
+
+  const applyFilters = () => {
+    let filtered = engineers;
+    
+    if (searchTerm) {
+      filtered = filtered.filter(engineer => 
+        engineer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        engineer.email.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    if (skillFilter) {
+      filtered = filtered.filter(engineer => 
+        engineer.skills?.some(skill => 
+          skill.toLowerCase().includes(skillFilter.toLowerCase())
+        )
+      );
+    }
+    
+    if (seniorityFilter) {
+      filtered = filtered.filter(engineer => 
+        engineer.seniority?.toLowerCase() === seniorityFilter.toLowerCase()
+      );
+    }
+    
+    setFilteredEngineers(filtered);
+  };
 
   const getEmploymentType = (maxCapacity?: number) => {
     if (maxCapacity === 100) return 'Full-time';
@@ -50,9 +89,49 @@ const Engineers: React.FC = () => {
           </div>
         )}
 
+        {/* Search and Filter Section */}
+        <div className="bg-white border border-gray-100 rounded-xl p-6 mb-8">
+          <h2 className="text-lg font-medium text-gray-900 mb-4">Search & Filter Engineers</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+              <input
+                type="text"
+                placeholder="Search by name or email..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Skill</label>
+              <input
+                type="text"
+                placeholder="e.g., React, Python..."
+                value={skillFilter}
+                onChange={(e) => setSkillFilter(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Seniority</label>
+              <select
+                value={seniorityFilter}
+                onChange={(e) => setSeniorityFilter(e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-black focus:border-transparent"
+              >
+                <option value="">All Seniorities</option>
+                <option value="junior">Junior</option>
+                <option value="mid">Mid</option>
+                <option value="senior">Senior</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
         {/* Mobile Cards View */}
         <div className="block lg:hidden space-y-4">
-          {engineers.map(engineer => (
+          {filteredEngineers.map(engineer => (
             <div key={engineer.id} className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200">
               <div className="flex items-start justify-between mb-4">
                 <div>
@@ -119,7 +198,7 @@ const Engineers: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-50">
-                  {engineers.map(engineer => (
+                  {filteredEngineers.map(engineer => (
                     <tr key={engineer.id} className="hover:bg-gray-50/50 transition-colors duration-150">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="text-sm font-medium text-gray-900">{engineer.name}</div>
@@ -159,9 +238,11 @@ const Engineers: React.FC = () => {
           </div>
         </div>
 
-        {engineers.length === 0 && !error && (
+        {filteredEngineers.length === 0 && !error && (
           <div className="text-center py-12">
-            <div className="text-gray-400 text-lg">No engineers found</div>
+            <div className="text-gray-400 text-lg">
+              {engineers.length === 0 ? 'No engineers found' : 'No engineers match your search criteria'}
+            </div>
           </div>
         )}
       </div>
