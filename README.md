@@ -9,6 +9,10 @@ A full-stack web application for managing engineering resources, projects, and a
 - Role-based access control (Manager/Engineer)
 - Secure password hashing with bcrypt
 
+### Login cred for manager and engineer
+manger - email - arjunverma@gmail.com password - admin999
+Engineer - email - ankit@gmail.com password - admin999
+
 ### 👥 User Management
 - User registration and login
 - Role-based permissions
@@ -45,7 +49,7 @@ A full-stack web application for managing engineering resources, projects, and a
 ## Tech Stack
 
 ### Backend
-- **FastAPI** - Modern Python web framework
+- **Python FastAPI** - Modern Python web framework
 - **SQLAlchemy** - ORM for database operations
 - **MySQL** - Database
 - **Alembic** - Database migrations
