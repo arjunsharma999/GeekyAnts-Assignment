@@ -66,5 +66,7 @@ class AssignmentCreate(AssignmentBase):
 
 class AssignmentOut(AssignmentBase):
     id: int
+    engineerName: Optional[str] = None
+    projectName: Optional[str] = None
     class Config:
         orm_mode = True 

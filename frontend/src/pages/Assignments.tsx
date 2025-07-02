@@ -85,10 +85,10 @@ const Assignments: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-4">Assignments</h1>
+      <h1 className="text-2xl mb-4">Assignments</h1>
       {isManager && (
         <div className="mb-8 bg-white p-6 rounded shadow">
-          <h2 className="text-xl font-semibold mb-2">Create Assignment</h2>
+          <h2 className="text-xl mb-2">Create Assignment</h2>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium">Project</label>
@@ -181,7 +181,7 @@ const Assignments: React.FC = () => {
             <button
               type="submit"
               disabled={loading}
-              className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 disabled:opacity-50"
+              className="bg-black text-white px-4 py-2 rounded hover:bg-black disabled:opacity-50"
             >
               {loading ? 'Assigning...' : 'Create Assignment'}
             </button>

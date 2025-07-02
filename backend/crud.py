@@ -31,8 +31,8 @@ def get_user_by_email(db: Session, email: str):
 def get_user(db: Session, user_id: int):
     return db.query(models.User).filter(models.User.id == user_id).first()
 
-def create_project(db: Session, project: schemas.ProjectCreate):
-    db_project = models.Project(**project.dict())
+def create_project(db: Session, project: schemas.ProjectCreate, manager_id: int):
+    db_project = models.Project(**project.dict(), managerId=manager_id)
     db.add(db_project)
     db.commit()
     db.refresh(db_project)

@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { authAPI } from '../services/api';
 import { CreateUserRequest } from '../types';
+import { useNavigate } from 'react-router-dom';
+import Navigation from '../components/Navigation';
 
 const initialForm: CreateUserRequest = {
   email: '',
@@ -40,8 +42,11 @@ const Register: React.FC = () => {
   };
 
   return (
+    <>
+    <Navigation />
+    
     <div className="max-w-md mx-auto p-8">
-      <h1 className="text-2xl font-bold mb-4">Register New User</h1>
+      <h1 className="text-2xl mb-4">Register New User</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input type="email" name="email" value={form.email} onChange={handleChange} required placeholder="Email" className="w-full border px-3 py-2 rounded" />
         <input type="text" name="name" value={form.name} onChange={handleChange} required placeholder="Name" className="w-full border px-3 py-2 rounded" />
@@ -63,9 +68,10 @@ const Register: React.FC = () => {
         <input type="text" name="department" value={form.department} onChange={handleChange} placeholder="Department" className="w-full border px-3 py-2 rounded" />
         {error && <div className="text-red-600">{error}</div>}
         {success && <div className="text-green-600">{success}</div>}
-        <button type="submit" className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">Register</button>
+        <button type="submit" className="bg-black text-white px-4 py-2 rounded hover:bg-indigo-700">Register</button>
       </form>
     </div>
+    </>
   );
 };
 

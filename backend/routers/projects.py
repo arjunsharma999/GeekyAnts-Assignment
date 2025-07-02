@@ -17,9 +17,7 @@ def create_project(
     db: Session = Depends(get_db),
     current_manager: models.User = Depends(auth.get_current_manager)
 ):
-    # Set the manager ID to the current authenticated manager
-    project.managerId = current_manager.id
-    return crud.create_project(db, project)
+    return crud.create_project(db, project, current_manager.id)
 
 @router.get("/", response_model=list[schemas.ProjectOut])
 def get_all_projects(

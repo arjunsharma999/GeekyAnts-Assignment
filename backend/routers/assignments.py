@@ -25,13 +25,18 @@ def get_all_assignments(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(auth.get_current_user)
 ):
-    if current_user.role == models.UserRole.engineer:
-        # Engineers can only see their own assignments
-        assignments = crud.get_all_assignments(db)
-        return [a for a in assignments if a.engineerId == current_user.id]
-    else:
-        # Managers can see all assignments
-        return crud.get_all_assignments(db)
+    assignments = crud.get_all_assignments(db)
+    result = []
+    for a in assignments:
+        if current_user.role == models.UserRole.engineer and a.engineerId != current_user.id:
+            continue
+        engineer = db.query(models.User).filter(models.User.id == a.engineerId).first()
+        project = db.query(models.Project).filter(models.Project.id == a.projectId).first()
+        assignment_dict = a.__dict__.copy()
+        assignment_dict["engineerName"] = engineer.name if engineer else None
+        assignment_dict["projectName"] = project.name if project else None
+        result.append(assignment_dict)
+    return result
 
 @router.get("/{assignment_id}", response_model=schemas.AssignmentOut)
 def get_assignment(
