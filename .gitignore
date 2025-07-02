@@ -1,0 +1,34 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+.env
+*.sqlite3
+*.db
+instance/
+*.log
+
+# VSCode
+.vscode/
+
+# Node.js
+node_modules/
+*.log
+dist/
+build/
+
+# React
+frontend/build/
+frontend/node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Others
+*.bak
+*.swp
+*.swo
+.idea/ 
